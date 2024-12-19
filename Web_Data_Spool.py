@@ -42,6 +42,7 @@ def main():
     st.write("Fetch data from PostgreSQL by specifying a table, date range, and export it as CSV or Excel.")
 
     # Sidebar for database connection parameters
+    '''
     st.sidebar.header("Database Connection")
     db_params = {
         "host": st.sidebar.text_input("Host", value="localhost"),
@@ -50,7 +51,9 @@ def main():
         "user": st.sidebar.text_input("User", value="your_username"),
         "password": st.sidebar.text_input("Password", type="password")
     }
-
+   '''
+    # Fetch secrets from Streamlit's secrets manager
+    db_params = st.secrets["bitnob-servers.postgres.database.azure.com"], st.secrets["5432"], st.secrets["data_bitnob_team"], st.secrets["bitnob_db"], st.secrets["050A0A7N2T_3@NT"]
     # Mapping of user-friendly table names to actual table names
     table_mapping = {
         "Deposit": "data_spool.b2c_collections",
