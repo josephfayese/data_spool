@@ -4,7 +4,7 @@ import psycopg2
 from io import BytesIO
 
 # Function to connect to PostgreSQL and fetch data
-def fetch_data(start_date, end_date, db_params):
+def fetch_data(start_date, end_date, table_name, db_params):
     try:
         # PostgreSQL connection
         conn = psycopg2.connect(
@@ -14,10 +14,10 @@ def fetch_data(start_date, end_date, db_params):
             user=db_params["user"],
             password=db_params["password"]
         )
-        # SQL query to fetch data based on date range
-        query = """
+        # Use the provided table name in the SQL query
+        query = f"""
             SELECT * 
-            FROM data_spool.b2c_collections
+            FROM {table_name}
             WHERE transaction_date BETWEEN %s AND %s
         """
         # Fetch data into DataFrame
@@ -39,7 +39,7 @@ def to_excel(df):
 # Streamlit App
 def main():
     st.title("PostgreSQL Data Export Tool")
-    st.write("Fetch data from PostgreSQL by specifying a date range and export it as CSV or Excel.")
+    st.write("Fetch data from PostgreSQL by specifying a table, date range, and export it as CSV or Excel.")
 
     # Sidebar for database connection parameters
     st.sidebar.header("Database Connection")
@@ -50,6 +50,22 @@ def main():
         "user": st.sidebar.text_input("User", value="your_username"),
         "password": st.sidebar.text_input("Password", type="password")
     }
+
+    # Mapping of user-friendly table names to actual table names
+    table_mapping = {
+        "Deposit": "data_spool.b2c_collections",
+        "Withdrawals": "data_spool.b2c_payouts",
+        "Trongrid": "data_spool.trongrid",
+        "OKX Data": "data_spool.okx_data",
+        "App Transactions": "data_spool.in_app_transactions",
+        "Nobblet for Finance": "data_spool.nobblet_finance",
+        "Bitnob for Nobblet": "data_spool.nobblet_bitnob_records",
+    }
+
+    # Dropdown for table selection
+    st.subheader("Select Table to Fetch Data From")
+    selected_table = st.selectbox("Table Name", list(table_mapping.keys()))
+    table_name = table_mapping[selected_table]
 
     # Date inputs for filtering data
     st.subheader("Specify Date Range")
@@ -66,8 +82,8 @@ def main():
 
     # Button to fetch data
     if st.button("Fetch Data"):
-        st.info("Fetching data from database...")
-        data = fetch_data(start_date_str, end_date_str, db_params)
+        st.info(f"Fetching data from table: {selected_table}...")
+        data = fetch_data(start_date_str, end_date_str, table_name, db_params)
         if data is not None and not data.empty:
             st.success("Data fetched successfully!")
             st.write(f"Number of records: {len(data)}")
@@ -85,7 +101,7 @@ def main():
                 st.download_button(
                     label="📥 Download CSV",
                     data=csv,
-                    file_name="data_export.csv",
+                    file_name=f"{selected_table.replace(' ', '_').lower()}_data_export.csv",
                     mime="text/csv"
                 )
 
@@ -95,12 +111,11 @@ def main():
                 st.download_button(
                     label="📥 Download Excel",
                     data=excel,
-                    file_name="data_export.xlsx",
+                    file_name=f"{selected_table.replace(' ', '_').lower()}_data_export.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
         else:
-            st.warning("No data found for the specified date range!")
+            st.warning("No data found for the specified date range or table!")
 
 if __name__ == "__main__":
     main()
-
