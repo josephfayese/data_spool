@@ -54,13 +54,17 @@ def main():
    '''
     # Fetch secrets from Streamlit's secrets manager
     db_params = {
-       "host": st.secrets["bitnob-servers.postgres.database.azure.com"], 
-       "port": st.secrets["5432"], 
-       "user": st.secrets["data_bitnob_team"], 
-       "database": st.secrets["bitnob_db"],
-       "password": st.secrets["050A0A7N2T_3@NT"]
+        "host": st.secrets["bitnob-servers"]["postgres"]["host"],
+        "port": st.secrets["bitnob-servers"]["postgres"]["port"],
+        "user": st.secrets["bitnob-servers"]["postgres"]["user"],
+        "database": st.secrets["bitnob-servers"]["postgres"]["database"],
+        "password": st.secrets["bitnob-servers"]["postgres"]["password"],
     }
-    
+
+    # Example usage of password_key if needed
+    password_key = st.secrets["other_keys"]["password_key"]
+    st.write(f"The retrieved password key is: {password_key}")
+
     # Mapping of user-friendly table names to actual table names
     table_mapping = {
         "Deposit": "data_spool.b2c_collections",
