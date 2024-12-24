@@ -53,13 +53,18 @@ def main():
     }           
    '''
     # Fetch secrets from Streamlit's secrets manager
-    db_params = {
-        "host": st.secrets["bitnob-servers"]["postgres"]["host"],
-        "port": st.secrets["bitnob-servers"]["postgres"]["port"],
-        "user": st.secrets["bitnob-servers"]["postgres"]["user"],
-        "database": st.secrets["bitnob-servers"]["postgres"]["database"],
-        "password": st.secrets["bitnob-servers"]["postgres"]["password"],
-    }
+    try:
+        db_params = {
+            "host": st.secrets["bitnob-servers"]["postgres"]["host"],
+            "port": st.secrets["bitnob-servers"]["postgres"]["port"],
+            "database": st.secrets["bitnob-servers"]["postgres"]["database"],
+            "user": st.secrets["bitnob-servers"]["postgres"]["user"],
+            "password": st.secrets["bitnob-servers"]["postgres"]["password"],
+        }
+    except KeyError as e:
+        st.error(f"Missing key in secrets: {e}")
+        st.stop()
+
 
     # Example usage of password_key if needed
     password_key = st.secrets["other_keys"]["password_key"]
