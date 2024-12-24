@@ -41,17 +41,6 @@ def main():
     st.title("PostgreSQL Data Export Tool")
     st.write("Fetch data from PostgreSQL by specifying a table, date range, and export it as CSV or Excel.")
 
-    # Sidebar for database connection parameters
-    '''
-    st.sidebar.header("Database Connection")
-    db_params = {
-        "host": st.sidebar.text_input("Host", value="localhost"),
-        "port": st.sidebar.text_input("Port", value="5432"),
-        "database": st.sidebar.text_input("Database", value="your_database"),
-        "user": st.sidebar.text_input("User", value="your_username"),
-        "password": st.sidebar.text_input("Password", type="password")
-    }           
-   '''
     # Fetch secrets from Streamlit's secrets manager
     try:
         db_params = {
@@ -68,7 +57,7 @@ def main():
 
     # Example usage of password_key if needed
     password_key = st.secrets["other_keys"]["password_key"]
-    st.write(f"The retrieved password key is: {password_key}")
+    # st.write(f"The retrieved password key is: {password_key}")
 
     # Mapping of user-friendly table names to actual table names
     table_mapping = {
