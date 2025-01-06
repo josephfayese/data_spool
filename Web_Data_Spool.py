@@ -1,29 +1,40 @@
 import streamlit as st
 import pandas as pd
 import psycopg2
+from psycopg2.extras import RealDictCursor
+from sqlalchemy import create_engine
 from io import BytesIO
 
-# Function to connect to PostgreSQL and fetch data
-def fetch_data(start_date, end_date, table_name, db_params):
+# Function to fetch data in chunks
+def fetch_data_in_chunks(start_date, end_date, table_name, db_params, chunk_size=50000):
     try:
-        # PostgreSQL connection
-        conn = psycopg2.connect(
-            host=db_params["host"],
-            port=db_params["port"],
-            database=db_params["database"],
-            user=db_params["user"],
-            password=db_params["password"]
+        # Using SQLAlchemy for efficient DB connection and query handling
+        engine = create_engine(
+            f"postgresql+psycopg2://{db_params['user']}:{db_params['password']}@{db_params['host']}:{db_params['port']}/{db_params['database']}"
         )
-        # Use the provided table name in the SQL query
+        conn = engine.connect()
+        
+        # Define query with placeholders
         query = f"""
             SELECT * 
             FROM {table_name}
-            WHERE transaction_date BETWEEN %s AND %s
+            WHERE transaction_date BETWEEN :start_date AND :end_date
         """
-        # Fetch data into DataFrame
-        df = pd.read_sql_query(query, conn, params=(start_date, end_date))
+        
+        # Initialize an empty DataFrame
+        data = pd.DataFrame()
+        
+        # Fetch data in chunks
+        for chunk in pd.read_sql_query(
+            query,
+            conn,
+            params={"start_date": start_date, "end_date": end_date},
+            chunksize=chunk_size,
+        ):
+            data = pd.concat([data, chunk], ignore_index=True)
+        
         conn.close()
-        return df
+        return data
     except Exception as e:
         st.error(f"Error fetching data: {e}")
         return None
@@ -33,8 +44,7 @@ def to_excel(df):
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Data')
-    processed_data = output.getvalue()
-    return processed_data
+    return output.getvalue()
 
 # Streamlit App
 def main():
@@ -54,12 +64,7 @@ def main():
         st.error(f"Missing key in secrets: {e}")
         st.stop()
 
-
-    # Example usage of password_key if needed
-    password_key = st.secrets["other_keys"]["password_key"]
-    # st.write(f"The retrieved password key is: {password_key}")
-
-    # Mapping of user-friendly table names to actual table names
+    # Table mapping
     table_mapping = {
         "Deposit": "data_spool.b2c_collections",
         "Withdrawals": "data_spool.b2c_payouts",
@@ -91,7 +96,7 @@ def main():
     # Button to fetch data
     if st.button("Fetch Data"):
         st.info(f"Fetching data from table: {selected_table}...")
-        data = fetch_data(start_date_str, end_date_str, table_name, db_params)
+        data = fetch_data_in_chunks(start_date_str, end_date_str, table_name, db_params)
         if data is not None and not data.empty:
             st.success("Data fetched successfully!")
             st.write(f"Number of records: {len(data)}")
