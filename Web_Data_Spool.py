@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from urllib.parse import quote_plus
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from sqlalchemy import create_engine
@@ -8,9 +9,12 @@ from io import BytesIO
 # Function to fetch data in chunks
 def fetch_data_in_chunks(start_date, end_date, table_name, db_params, chunk_size=50000):
     try:
+        # Encode the password to handle special characters
+        password = quote_plus(db_params["password"])
+        
         # Using SQLAlchemy for efficient DB connection and query handling
         engine = create_engine(
-            f"postgresql+psycopg2://{db_params['user']}:{db_params['password']}@{db_params['host']}:{db_params['port']}/{db_params['database']}"
+            f"postgresql+psycopg2://{db_params['user']}:{password}@{db_params['host']}:{db_params['port']}/{db_params['database']}"
         )
         conn = engine.connect()
         
