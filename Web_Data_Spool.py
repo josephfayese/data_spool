@@ -8,6 +8,7 @@ from io import BytesIO
 
 # Function to fetch data in chunks
 def fetch_data_in_chunks(start_date, end_date, table_name, db_params, chunk_size=50000):
+    from sqlalchemy import text
     try:
         # Encode the password to handle special characters
         password = quote_plus(db_params["password"])
@@ -18,11 +19,11 @@ def fetch_data_in_chunks(start_date, end_date, table_name, db_params, chunk_size
         )
         conn = engine.connect()
         
-        # Define query with placeholders
+        # Define query with placeholders for psycopg2 (%s)
         query = f"""
             SELECT * 
             FROM {table_name}
-            WHERE transaction_date BETWEEN :start_date AND :end_date
+            WHERE transaction_date BETWEEN %s AND %s
         """
         
         # Initialize an empty DataFrame
@@ -30,9 +31,9 @@ def fetch_data_in_chunks(start_date, end_date, table_name, db_params, chunk_size
         
         # Fetch data in chunks
         for chunk in pd.read_sql_query(
-            query,
-            conn,
-            params={"start_date": start_date, "end_date": end_date},
+            sql=query,
+            con=conn,
+            params=(start_date, end_date),
             chunksize=chunk_size,
         ):
             data = pd.concat([data, chunk], ignore_index=True)
@@ -42,6 +43,7 @@ def fetch_data_in_chunks(start_date, end_date, table_name, db_params, chunk_size
     except Exception as e:
         st.error(f"Error fetching data: {e}")
         return None
+
 
 # Function to export DataFrame to Excel
 def to_excel(df):
