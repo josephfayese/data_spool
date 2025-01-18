@@ -80,6 +80,7 @@ def main():
         "Nobblet for Finance": "data_spool.nobblet_finance",
         "Bitnob for Nobblet": "data_spool.nobblet_bitnob_records",
         "App Card termination records": "data_spool.card_termination_tbl",
+        "Card Corssborder Records": "data_spool.card_crossborder_tbl"
     }
 
     # Dropdown for table selection
