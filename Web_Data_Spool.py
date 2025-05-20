@@ -18,7 +18,7 @@ def fetch_data_in_chunks(start_date, end_date, table_name, db_params, chunk_size
         query = f"""
             SELECT * 
             FROM {table_name}
-            WHERE transaction_date BETWEEN %s AND %s
+            WHERE transaction_date::date BETWEEN %s AND %s
         """
 
         chunks = []
