@@ -74,7 +74,7 @@ def main():
         "OKX Data": "data_spool.okx_data",
         "App Transactions": "data_spool.in_app_transactions",
         "Nobblet for Finance": "data_spool.nobblet_finance",
-        "Bitnob for Nobblet": "data_spool.nobblet_bitnob"
+        "Bitnob for Nobblet": "data_spool.nobblet_bitnob_records"
     }
 
     table_choice = st.selectbox("Select Table", list(table_mapping.keys()))
