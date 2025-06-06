@@ -81,6 +81,9 @@ def main():
     start_date = st.date_input("Start Date")
     end_date = st.date_input("End Date")
 
+    start_date = start_date.strftime('%Y-%m-%d')
+    end_date = end_date.strftime('%Y-%m-%d')
+
     if st.button("Fetch and Preview Data"):
         df = fetch_data_in_chunks(start_date, end_date, table_mapping[table_choice], db_params)
         if not df.empty:
