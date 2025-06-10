@@ -74,7 +74,9 @@ def main():
         "OKX Data": "data_spool.okx_data",
         "App Transactions": "data_spool.in_app_transactions",
         "Nobblet for Finance": "data_spool.nobblet_finance",
-        "Bitnob for Nobblet": "data_spool.nobblet_bitnob_records"
+        "Bitnob for Nobblet": "data_spool.nobblet_bitnob_records",
+        "Card Crossborder": "data_spool.card_crossborder_tbl",
+        "Card Terminations": "data_spool.card_termination_tbl"
     }
 
     table_choice = st.selectbox("Select Table", list(table_mapping.keys()))
